@@ -1,0 +1,9 @@
+env/
+bin/
+lib/
+include/
+pyvenv.cfg
+__pycache__/
+.antlr/
+*.interp
+*.tokens
