@@ -1,0 +1,5 @@
+PROGRAMA P4
+INICIO
+INT x = 2 + 3 * 4;
+IMPRIMIR(x);
+FIN
