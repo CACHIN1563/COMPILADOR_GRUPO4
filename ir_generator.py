@@ -2,6 +2,7 @@ from llvmlite import ir
 from Gramatica_v3Visitor import Gramatica_v3Visitor
 
 class IRGenerator(Gramatica_v3Visitor):
+
     def __init__(self):
         self.module = ir.Module(name="compilador_grupo4_v3")
         self.int_type = ir.IntType(32)
@@ -13,6 +14,87 @@ class IRGenerator(Gramatica_v3Visitor):
         self.builder = ir.IRBuilder(block)
 
         self.variables = {}
+
+        self.printf = ir.Function(
+            self.module,
+            ir.FunctionType(
+                ir.IntType(32),
+                [ir.PointerType(ir.IntType(8))],
+                var_arg=True
+            ),
+            name="printf"
+        )
+
+        formato = "%d\n\0"
+        self.formato_print = ir.GlobalVariable(
+            self.module,
+            ir.ArrayType(ir.IntType(8), len(formato)),
+            name="formato_int"
+        )
+        self.formato_print.global_constant = True
+        self.formato_print.initializer = ir.Constant(
+            ir.ArrayType(ir.IntType(8), len(formato)),
+            bytearray(formato.encode("utf8"))
+        )
+
+    def visitSentenciaImprimirG4(self, ctx):
+        valor = self.visit(ctx.impresion().expr())
+
+        formato_ptr = self.builder.bitcast(
+            self.formato_print,
+            ir.PointerType(ir.IntType(8))
+        )
+
+        self.builder.call(self.printf, [formato_ptr, valor])
+        return None
+
+    def visitVarArrayDeclarationG4(self, ctx):
+        nombre = ctx.TK_ID().getText()
+        valores = ctx.arrayLiteral().expr()
+        size = len(valores)
+
+        array_type = ir.ArrayType(self.int_type, size)
+        ptr = self.builder.alloca(array_type, name=nombre)
+        self.variables[nombre] = {
+            "ptr": ptr,
+            "size": size,
+            "type": "array"
+        }
+
+        for i, expr in enumerate(valores):
+            valor = self.visit(expr)
+            elem_ptr = self.builder.gep(
+                ptr,
+                [
+                    ir.Constant(self.int_type, 0),
+                    ir.Constant(self.int_type, i)
+                ],
+                name=f"{nombre}_{i}_ptr"
+            )
+            self.builder.store(valor, elem_ptr)
+
+        return ptr
+
+    def visitExprArrayAccessG4(self, ctx):
+        nombre = ctx.TK_ID().getText()
+        indice_texto = ctx.expr().getText()
+
+        if not indice_texto.isdigit():
+            return ir.Constant(self.int_type, 0)
+
+        indice = int(indice_texto)
+        info = self.variables[nombre]
+
+        elem_ptr = self.builder.gep(
+            info["ptr"],
+            [
+                ir.Constant(self.int_type, 0),
+                ir.Constant(self.int_type, indice)
+            ],
+            name=f"{nombre}_{indice}_access"
+        )
+
+        return self.builder.load(elem_ptr, name=f"{nombre}_{indice}")
 
     def get_ir(self):
         if not self.builder.block.is_terminated:
@@ -42,8 +124,12 @@ class IRGenerator(Gramatica_v3Visitor):
 
     def visitExprReferenciaVariableG4(self, ctx):
         nombre = ctx.TK_ID().getText()
-        ptr = self.variables[nombre]
-        return self.builder.load(ptr, name=nombre)
+        info = self.variables[nombre]
+
+        if isinstance(info, dict):
+            return ir.Constant(self.int_type, 0)
+
+        return self.builder.load(info, name=nombre)
 
     def visitExprAritmeticaSumaResG4(self, ctx):
         l = self.visit(ctx.expr(0))
