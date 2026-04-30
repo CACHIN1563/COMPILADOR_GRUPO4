@@ -1,0 +1,6 @@
+PROGRAMA P3
+INICIO
+INT a = 10;
+INT b = 3;
+IMPRIMIR(a % b);
+FIN
