@@ -58,6 +58,10 @@ class PipelineV3:
             for line in tac.get_code():
                 print(line)
 
+            with open("salida.tac", "w", encoding="utf-8") as f:
+                for line in tac.get_code():
+                    f.write(line + "\n")
+
             print("\n>>> Generando LLVM IR...")
             irgen = IRGenerator()
             irgen.visit(tree)
