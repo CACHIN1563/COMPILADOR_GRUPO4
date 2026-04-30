@@ -5,6 +5,8 @@ from Gramatica_v3Parser import Gramatica_v3Parser
 from custom_errors import CustomErrorListener
 from semantic_visitor_v3 import SemanticVisitorV3
 from interpreter_visitor_v3 import InterpreterVisitorV3
+from tac_generator import TACGenerator
+from ir_generator import IRGenerator
 
 class PipelineV3:
     def __init__(self, file_path):
@@ -45,8 +47,28 @@ class PipelineV3:
                 for e in semantic.errores:
                     print(e)
                 return
-
+            
             print("✔ Semántico OK")
+
+            print("\n>>> Generando TAC...")
+            tac = TACGenerator()
+            tac.visit(tree)
+
+            print("\n--- CÓDIGO TAC ---")
+            for line in tac.get_code():
+                print(line)
+
+            print("\n>>> Generando LLVM IR...")
+            irgen = IRGenerator()
+            irgen.visit(tree)
+
+            llvm_ir = irgen.get_ir()
+
+            print("\n--- LLVM IR ---")
+            print(llvm_ir)
+
+            with open("salida.ll", "w", encoding="utf-8") as f:
+                f.write(llvm_ir)
 
             # 4. EJECUCION
             interpreter = InterpreterVisitorV3()
