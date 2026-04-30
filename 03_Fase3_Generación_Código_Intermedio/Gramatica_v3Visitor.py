@@ -24,8 +24,18 @@ class Gramatica_v3Visitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by Gramatica_v3Parser#DeclImportG4.
+    def visitDeclImportG4(self, ctx:Gramatica_v3Parser.DeclImportG4Context):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by Gramatica_v3Parser#DeclInstruccionG4.
     def visitDeclInstruccionG4(self, ctx:Gramatica_v3Parser.DeclInstruccionG4Context):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by Gramatica_v3Parser#importacion.
+    def visitImportacion(self, ctx:Gramatica_v3Parser.ImportacionContext):
         return self.visitChildren(ctx)
 
 

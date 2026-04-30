@@ -19,6 +19,29 @@ class SemanticVisitorV3(Gramatica_v3Visitor):
         self.errores.append(f"[Semántico] Línea {linea}:{col} -> {msg}")
 
     # =====================================================
+    # PROGRAMA
+    # =====================================================
+    def visitProgramG4(self, ctx):
+        for d in ctx.declaration():
+            self.visit(d)
+        return None
+
+    def visitDeclVariableG4(self, ctx):
+        return self.visit(ctx.varDeclaration())
+
+    def visitDeclFuncionG4(self, ctx):
+        return self.visit(ctx.funcDeclaration())
+
+    def visitDeclInstruccionG4(self, ctx):
+        return self.visit(ctx.instruccion())
+
+    def visitDeclImportG4(self, ctx):
+        nombre_modulo = ctx.importacion().TK_ID().getText()
+        # Registro básico del import
+        self.tabla_simbolos.declare(nombre_modulo, "modulo")
+        return "modulo"
+
+    # =====================================================
     # TIPOS
     # =====================================================
     def visitTypeIntG4(self, ctx): return "int"
@@ -35,12 +58,12 @@ class SemanticVisitorV3(Gramatica_v3Visitor):
         tipo = self.visit(ctx.type_())
         nombre = ctx.TK_ID().getText()
 
-        valor_tipo = None
         if ctx.expr():
             valor_tipo = self.visit(ctx.expr())
-
             if valor_tipo and valor_tipo != tipo:
-                self.error(ctx, f"No puedes asignar {valor_tipo} a {tipo}")
+                # Permitir int -> float
+                if not (tipo == "float" and valor_tipo == "int"):
+                    self.error(ctx, f"No puedes asignar {valor_tipo} a {tipo}")
 
         ok, err = self.tabla_simbolos.declare(nombre, tipo)
         if not ok:
@@ -54,12 +77,11 @@ class SemanticVisitorV3(Gramatica_v3Visitor):
     def visitVarArrayDeclarationG4(self, ctx):
         nombre = ctx.TK_ID().getText()
 
-        valores = []
-        for e in ctx.arrayLiteral().expr():
-            t = self.visit(e)
-            if t != "int":
-                self.error(ctx, "Los arrays solo permiten enteros")
-            valores.append(t)
+        if ctx.arrayLiteral():
+            for e in ctx.arrayLiteral().expr():
+                t = self.visit(e)
+                if t != "int":
+                    self.error(ctx, "Los arrays solo permiten enteros en este ejemplo")
 
         ok, err = self.tabla_simbolos.declare(nombre, "int[]")
         if not ok:
@@ -86,6 +108,49 @@ class SemanticVisitorV3(Gramatica_v3Visitor):
         return "int"
 
     # =====================================================
+    # CONTROL DE FLUJO
+    # =====================================================
+    def visitSentenciaIfElseG4(self, ctx):
+        cond = self.visit(ctx.condicional().expr())
+        if cond != "bool":
+            self.error(ctx, "Condición del SI debe ser booleana")
+        
+        self.visit(ctx.condicional().bloque(0))
+        if ctx.condicional().bloque(1):
+            self.visit(ctx.condicional().bloque(1))
+
+    def visitSentenciaMientrasG4(self, ctx):
+        cond = self.visit(ctx.bucle_mientras().expr())
+        if cond != "bool":
+            self.error(ctx, "Condición del MIENTRAS debe ser booleana")
+        self.visit(ctx.bucle_mientras().bloque())
+
+    def visitSentenciaForG4(self, ctx):
+        # Enter loop scope? Simbol table needs scopes
+        self.visit(ctx.bucle_for().bloque())
+
+    def visitSentenciaBreakG4(self, ctx): return None
+    def visitSentenciaContinueG4(self, ctx): return None
+
+    # =====================================================
+    # FUNCIONES
+    # =====================================================
+    def visitFuncDeclarationG4(self, ctx):
+        nombre = ctx.TK_ID().getText()
+        tipo_ret = self.visit(ctx.type_())
+        # En una tabla de símbolos real, registraríamos la firma
+        self.tabla_simbolos.declare(nombre, f"func:{tipo_ret}")
+        self.visit(ctx.bloque())
+        return tipo_ret
+
+    def visitExprLlamadaFuncionG4(self, ctx):
+        nombre = ctx.TK_ID().getText()
+        simbolo = self.tabla_simbolos.lookup(nombre)
+        if simbolo and simbolo['type'].startswith("func:"):
+            return simbolo['type'].split(":")[1]
+        return "desconocido"
+
+    # =====================================================
     # EXPRESIONES
     # =====================================================
     def visitExprLiteralNumericaG4(self, ctx):
@@ -108,6 +173,20 @@ class SemanticVisitorV3(Gramatica_v3Visitor):
 
         return simbolo['type']
 
+    def visitAsignacionVariableG4(self, ctx):
+        return self.visit(ctx.asignacion_core())
+
+    def visitAsignacionCoreG4(self, ctx):
+        nombre = ctx.TK_ID().getText()
+        simbolo = self.tabla_simbolos.lookup(nombre)
+        tipo_expr = self.visit(ctx.expr())
+
+        if simbolo:
+            if simbolo['type'] != tipo_expr:
+                if not (simbolo['type'] == "float" and tipo_expr == "int"):
+                    self.error(ctx, f"Tipo incorrecto en asignación: {simbolo['type']} != {tipo_expr}")
+        return tipo_expr
+
     # =====================================================
     # OPERACIONES
     # =====================================================
@@ -121,15 +200,23 @@ class SemanticVisitorV3(Gramatica_v3Visitor):
         if l == "string" and r == "string":
             return "string"
 
-        self.error(ctx, f"Suma inválida {l} + {r}")
         return "desconocido"
 
-    def visitExprAritmeticaMultDivModG4(self, ctx):
-        l = self.visit(ctx.expr(0))
-        r = self.visit(ctx.expr(1))
+    def visitExprRelacionalCompG4(self, ctx):
+        return "bool"
 
-        if l in ["int", "float"] and r in ["int", "float"]:
-            return "float" if "float" in [l, r] else "int"
+    def visitExprRelacionalIgualdadG4(self, ctx):
+        return "bool"
 
-        self.error(ctx, f"Operación inválida {l} y {r}")
-        return "desconocido"
+    def visitExprLogicaAndG4(self, ctx): return "bool"
+    def visitExprLogicaOrG4(self, ctx): return "bool"
+    def visitExprLogicaNotG4(self, ctx): return "bool"
+
+    def visitStatBloqueG4(self, ctx):
+        self.visit(ctx.bloque())
+        return None
+
+    def visitBloque(self, ctx):
+        for i in ctx.instruccion():
+            self.visit(i)
+        return None

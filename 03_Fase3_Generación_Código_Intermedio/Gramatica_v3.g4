@@ -24,7 +24,11 @@ program:
 declaration:
     varDeclaration    # DeclVariableG4
     | funcDeclaration # DeclFuncionG4
+    | importacion     # DeclImportG4
     | instruccion     # DeclInstruccionG4;
+
+importacion:
+    TK_IMPORT TK_ID SEMICOLON;
 
 varDeclaration
     : type TK_ID (ASSIGN expr)? SEMICOLON              # VarDeclarationG4

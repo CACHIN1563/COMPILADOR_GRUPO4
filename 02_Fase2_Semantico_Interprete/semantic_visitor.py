@@ -112,54 +112,58 @@ class SemanticVisitor(GramaticaVisitor):
 
     def visitSentenciaIfElseG4(self, ctx:GramaticaParser.SentenciaIfElseG4Context):
         # Obligatorio que el 'if' sea booleano
-        t_condicion = self.visit(ctx.expr())
+        c = ctx.condicional()
+        t_condicion = self.visit(c.expr())
         if t_condicion != "bool":
             self.reportar_error(ctx, f"El 'if' requiere una expresión booleana, no un '{t_condicion}'.")
         
-        self.visit(ctx.bloque(0))
-        if ctx.TK_ELSE():
-            self.visit(ctx.bloque(1))
+        self.visit(c.bloque(0))
+        if c.TK_SINO():
+            self.visit(c.bloque(1))
         return None
 
     def visitSentenciaMientrasG4(self, ctx:GramaticaParser.SentenciaMientrasG4Context):
         # El 'while' también requiere booleanos
-        t_c = self.visit(ctx.expr())
+        m = ctx.bucle_mientras()
+        t_c = self.visit(m.expr())
         if t_c != "bool":
             self.reportar_error(ctx, f"Condición de 'while' inválida: se esperaba bool, no '{t_c}'.")
         
         self.tabla_simbolos.push_scope() # Un while genera su propio ámbito local
-        self.visit(ctx.bloque())
+        self.visit(m.bloque())
         self.tabla_simbolos.pop_scope()
         return None
 
     def visitSentenciaForG4(self, ctx:GramaticaParser.SentenciaForG4Context):
         # Manejo de Scopes en el ciclo FOR
+        f = ctx.bucle_for()
         self.tabla_simbolos.push_scope()
         
-        if ctx.init_var: self.visit(ctx.init_var)
-        elif ctx.init_assign: self.visit(ctx.init_assign)
+        if f.init_var: self.visit(f.init_var)
+        elif f.init_assign: self.visit(f.init_assign)
         
-        if ctx.cond:
-            t_cond = self.visit(ctx.cond)
+        if f.cond:
+            t_cond = self.visit(f.cond)
             if t_cond != "bool":
                 self.reportar_error(ctx, f"Condición de 'for' debe ser booleana.")
         
-        if ctx.update_assign: self.visit(ctx.update_assign)
-        elif ctx.update_expr: self.visit(ctx.update_expr)
+        if f.update_assign: self.visit(f.update_assign)
+        elif f.update_expr: self.visit(f.update_expr)
 
-        self.visit(ctx.bloque())
-        self.tabla_simbolos.pop_scope() # Limpiamos memoria del ciclo
+        self.visit(f.bloque())
+        self.tabla_simbolos.pop_scope()
         return None
 
     def visitSentenciaReturnG4(self, ctx:GramaticaParser.SentenciaReturnG4Context):
         # Validación crítica del tipo de retorno
+        r = ctx.sentencia_return()
         if self.tipo_retorno_actual is None:
             self.reportar_error(ctx, "Error: Usaste 'return' fuera de una función.")
             return None
             
         t_ret_expr = "void"
-        if ctx.expr():
-            t_ret_expr = self.visit(ctx.expr())
+        if r.expr():
+            t_ret_expr = self.visit(r.expr())
             
         if not self.tipos_compatibles(self.tipo_retorno_actual, t_ret_expr):
             self.reportar_error(ctx, f"El 'return' no coincide. Se esperaba '{self.tipo_retorno_actual}' pero intentas devolver '{t_ret_expr}'.")
@@ -167,13 +171,13 @@ class SemanticVisitor(GramaticaVisitor):
         return t_ret_expr
 
     def visitSentenciaImprimirG4(self, ctx:GramaticaParser.SentenciaImprimirG4Context):
-        self.visit(ctx.expr()) # Solo validamos que la expresión sea correcta
+        self.visit(ctx.impresion().expr()) # Solo validamos que la expresión sea correcta
         return None
 
     def visitStatBloqueG4(self, ctx:GramaticaParser.StatBloqueG4Context):
         # Bloques aislados con {}
         self.tabla_simbolos.push_scope()
-        self.visitChildren(ctx)
+        self.visitChildren(ctx.bloque())
         self.tabla_simbolos.pop_scope()
         return None
 
