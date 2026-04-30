@@ -1,0 +1,27 @@
+PROGRAMA EjemploG4
+INICIO
+    // Declaraciones con tipo (Requisito del ingeniero)
+    INT x = 10;
+    FLOAT y = 5.5;
+    STRING mensaje = "Hola Mundo";
+    BOOL activo = true;
+
+    // Declaración de función (Requisito del ingeniero)
+    VOID saludar(STRING nombre) {
+        IMPRIMIR("Bienvenido: " + nombre);
+    }
+
+    // Llamada a función
+    saludar("Grupo 4");
+
+    // Ciclo FOR y Condicional
+    FOR (INT i = 0; i < 3; i = i + 1) {
+        SI (i == 1) ENTONCES {
+            IMPRIMIR("El valor es uno");
+        } SINO {
+            IMPRIMIR(i);
+        }
+    }
+
+    IMPRIMIR(mensaje);
+FIN

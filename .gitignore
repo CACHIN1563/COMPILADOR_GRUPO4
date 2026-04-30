@@ -6,4 +6,6 @@ pyvenv.cfg
 __pycache__/
 .antlr/
 *.interp
-*.tokens
+*.tokens*.tac
+*.ll
+*.class

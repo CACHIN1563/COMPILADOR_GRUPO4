@@ -1,0 +1,4 @@
+PROGRAMA ErrorLexico
+INICIO
+    x = 10 @; // El simbolo @ no esta definido en el Lexer
+FIN

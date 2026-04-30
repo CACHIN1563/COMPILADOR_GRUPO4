@@ -1,0 +1,4 @@
+PROGRAMA ErrorSintactico
+INICIO
+    x = ; // Error: Se esperaba una expresion después del '='
+FIN
