@@ -1,0 +1,6 @@
+PROGRAMA ErrorSemantico
+INICIO
+    x = 10;
+    y = "Texto";
+    resultado = x + y; // Error Semantico: Incompatibilidad de tipos (int + string)
+FIN

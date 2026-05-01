@@ -1,0 +1,22 @@
+PROGRAMA EjemploCompleto INICIO
+    // Variables y arreglos
+    INT[] nums = [3, 1, 4, 1, 5];
+    INT total = 0;
+    INT i = 0;
+
+    // Ciclo con break y módulo
+    MIENTRAS (i < 5) {
+        INT r = nums[i] % 2;
+        SI (r == 0) ENTONCES {
+            total = total + nums[i];
+        }
+        i = i + 1;
+        SI (total > 10) ENTONCES { BREAK; }
+    }
+
+    // Función recursiva
+    // Nota: El compilador actual tiene limitaciones en recursividad IR
+    // pero TAC lo mostrará correctamente.
+    
+    RETORNAR total;
+FIN

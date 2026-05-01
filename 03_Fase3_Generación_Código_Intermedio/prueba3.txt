@@ -1,0 +1,5 @@
+PROGRAMA P2
+INICIO
+INT[] nums = [2,4,6];
+IMPRIMIR(nums[1]);
+FIN

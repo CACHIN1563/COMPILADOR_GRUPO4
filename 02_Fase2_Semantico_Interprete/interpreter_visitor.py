@@ -61,44 +61,47 @@ class InterpreterVisitor(GramaticaVisitor):
 
     def visitSentenciaIfElseG4(self, ctx:GramaticaParser.SentenciaIfElseG4Context):
         # Lógica del IF real
-        cond_bool = self.visit(ctx.expr())
+        c = ctx.condicional()
+        cond_bool = self.visit(c.expr())
         if cond_bool:
-            self.visit(ctx.bloque(0))
-        elif ctx.TK_ELSE():
-            self.visit(ctx.bloque(1))
+            self.visit(c.bloque(0))
+        elif c.TK_SINO():
+            self.visit(c.bloque(1))
         return None
 
     def visitSentenciaMientrasG4(self, ctx:GramaticaParser.SentenciaMientrasG4Context):
         # Bucle WHILE
-        while self.visit(ctx.expr()):
-            self.visit(ctx.bloque())
+        m = ctx.bucle_mientras()
+        while self.visit(m.expr()):
+            self.visit(m.bloque())
         return None
 
     def visitSentenciaForG4(self, ctx:GramaticaParser.SentenciaForG4Context):
         # Ejecución del Ciclo FOR
+        f = ctx.bucle_for()
         self.tabla_simbolos.push_scope()
         
         # 1. Inicialización
-        if ctx.init_var: self.visit(ctx.init_var)
-        elif ctx.init_assign: self.visit(ctx.init_assign)
+        if f.init_var: self.visit(f.init_var)
+        elif f.init_assign: self.visit(f.init_assign)
         
         # 2. Bucle de ejecución
         while True:
-            if ctx.cond:
-                if not self.visit(ctx.cond): break
+            if f.cond:
+                if not self.visit(f.cond): break
             
-            self.visit(ctx.bloque())
+            self.visit(f.bloque())
             
             # 3. Actualización (update)
-            if ctx.update_assign: self.visit(ctx.update_assign)
-            elif ctx.update_expr: self.visit(ctx.update_expr)
+            if f.update_assign: self.visit(f.update_assign)
+            elif f.update_expr: self.visit(f.update_expr)
                 
         self.tabla_simbolos.pop_scope()
         return None
 
     def visitSentenciaImprimirG4(self, ctx:GramaticaParser.SentenciaImprimirG4Context):
         # La salida estándar nativa del lenguaje G4
-        valor_final = self.visit(ctx.expr())
+        valor_final = self.visit(ctx.impresion().expr())
         # Manejo bonito de booleanos en terminal
         if valor_final is True: print("true")
         elif valor_final is False: print("false")
@@ -107,14 +110,15 @@ class InterpreterVisitor(GramaticaVisitor):
 
     def visitSentenciaReturnG4(self, ctx:GramaticaParser.SentenciaReturnG4Context):
         # Interrumpe la ejecución del bloque lanzando el valor
+        r = ctx.sentencia_return()
         res = None
-        if ctx.expr():
-            res = self.visit(ctx.expr())
+        if r.expr():
+            res = self.visit(r.expr())
         raise ExcepcionRetorno(res)
 
     def visitStatBloqueG4(self, ctx:GramaticaParser.StatBloqueG4Context):
         self.tabla_simbolos.push_scope()
-        self.visitChildren(ctx)
+        self.visitChildren(ctx.bloque())
         self.tabla_simbolos.pop_scope()
         return None
 

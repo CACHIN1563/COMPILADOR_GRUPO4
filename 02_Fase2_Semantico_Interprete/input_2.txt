@@ -1,0 +1,34 @@
+PROGRAMA TestAritmetica
+INICIO
+    // Pruebas de Operaciones Aritmeticas Basicas ccachin
+    
+    a = 15;
+    b = 5;
+    
+    // 1. Suma y Resta
+    suma = a + b;
+    resta = a - b;
+    
+    // 2. Multiplicacion y Division
+    multiplicacion = a *  b;
+    division = a / b;
+    
+    // 3. Operaciones combinadas
+    combinada = (suma + resta) * division - multiplicacion;
+
+    IMPRIMIR("--- Resultados ---");
+    IMPRIMIR("Suma:");
+    IMPRIMIR(suma);
+    
+    IMPRIMIR("Resta:");
+    IMPRIMIR(resta);
+    
+    IMPRIMIR("Multiplicacion:");
+    IMPRIMIR(multiplicacion);
+    
+    IMPRIMIR("Division:");
+    IMPRIMIR(division);
+    
+    IMPRIMIR("Operacion Combinada:");
+    IMPRIMIR(combinada);
+FIN

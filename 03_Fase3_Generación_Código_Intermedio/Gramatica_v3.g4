@@ -1,4 +1,4 @@
-grammar Gramatica;
+grammar Gramatica_v3;
 
 // @header { # ================================================================= # PROYECTO:
 // LENGUAJE GRUPO 4 - UMG 2026 # INGENIERÍA EN SISTEMAS # DESCRIPCIÓN:
@@ -24,36 +24,51 @@ program:
 declaration:
     varDeclaration    # DeclVariableG4
     | funcDeclaration # DeclFuncionG4
+    | importacion     # DeclImportG4
     | instruccion     # DeclInstruccionG4;
 
-varDeclaration:
-    type_ TK_ID (ASSIGN expr)? SEMICOLON # VarDeclarationG4;
+importacion:
+    TK_IMPORT TK_ID SEMICOLON;
+
+varDeclaration
+    : type TK_ID (ASSIGN expr)? SEMICOLON              # VarDeclarationG4
+    | TK_INT TK_COR_IZQ TK_COR_DER TK_ID ASSIGN arrayLiteral SEMICOLON # VarArrayDeclarationG4
+    ;
+
+arrayLiteral
+    : TK_COR_IZQ (expr (TK_COMA expr)*)? TK_COR_DER
+    ;
 
 funcDeclaration:
-    type_ TK_ID TK_PAR_IZQ params? TK_PAR_DER bloque # FuncDeclarationG4;
+    type TK_ID TK_PAR_IZQ params? TK_PAR_DER bloque # FuncDeclarationG4;
 
 params:
     param (TK_COMA param)*;
 
 param:
-    type_ TK_ID;
+    type TK_ID;
 
-type_:
-    TK_INT      # TypeIntG4
-    | TK_FLOAT  # TypeFloatG4
-    | TK_STRING # TypeStringG4
-    | TK_BOOL   # TypeBoolG4
-    | TK_VOID   # TypeVoidG4;
+type
+    : TK_INT                                  # TypeIntG4
+    | TK_FLOAT                                # TypeFloatG4
+    | TK_STRING                               # TypeStringG4
+    | TK_BOOL                                 # TypeBoolG4
+    | TK_VOID                                 # TypeVoidG4
+    | TK_INT TK_COR_IZQ TK_COR_DER            # TypeIntArrayG4
+    ;
 
-instruccion:
-    asignacion_core SEMICOLON # AsignacionVariableG4
-    | condicional             # SentenciaIfElseG4
-    | bucle_mientras          # SentenciaMientrasG4
-    | bucle_for               # SentenciaForG4
-    | impresion               # SentenciaImprimirG4
-    | sentencia_return        # SentenciaReturnG4
-    | bloque                  # StatBloqueG4
-    | expr SEMICOLON          # SentenciaExpresionG4;
+instruccion
+    : asignacion_core SEMICOLON              # AsignacionVariableG4
+    | condicional                            # SentenciaIfElseG4
+    | bucle_mientras                         # SentenciaMientrasG4
+    | bucle_for                              # SentenciaForG4
+    | impresion                              # SentenciaImprimirG4
+    | sentencia_return                       # SentenciaReturnG4
+    | TK_BREAK SEMICOLON                     # SentenciaBreakG4
+    | TK_CONTINUE SEMICOLON                  # SentenciaContinueG4
+    | bloque                                 # StatBloqueG4
+    | expr SEMICOLON                         # SentenciaExpresionG4
+    ;
 
 bloque:
     TK_LLA_IZQ instruccion* TK_LLA_DER;
@@ -82,9 +97,8 @@ sentencia_return:
 expr:
     TK_NOT expr                                                 # ExprLogicaNotG4
     | <assoc = right> expr TK_POTENCIA expr                     # ExprPotenciaG4
-    | expr (TK_MULT | TK_DIV) expr                              # ExprAritmeticaMultDivG4
-    | expr (TK_SUMA | TK_RESTA) expr                            # ExprAritmeticaSumaResG4
-    | expr (TK_MAYOR | TK_MENOR | TK_MAYOREQ | TK_MENOREQ) expr   # ExprRelacionalCompG4
+    | expr (TK_MULT  | TK_DIV   | TK_MODULO) expr                  # ExprAritmeticaMultDivModG4    | expr (TK_SUMA | TK_RESTA) expr                            # ExprAritmeticaSumaResG4
+    | expr (TK_MAYOR | TK_MENOR | TK_MAYOREQ | TK_MENOREQ) expr # ExprRelacionalCompG4
     | expr (TK_IGUAL | TK_DIFERENTE) expr                       # ExprRelacionalIgualdadG4
     | expr TK_Y expr                                            # ExprLogicaAndG4
     | expr TK_O expr                                            # ExprLogicaOrG4
@@ -93,6 +107,7 @@ expr:
     | TK_CADENA                                                 # ExprLiteralCadenaG4
     | (TK_TRUE | TK_FALSE)                                      # ExprLiteralBoolG4
     | TK_ID TK_PAR_IZQ args? TK_PAR_DER                         # ExprLlamadaFuncionG4
+    | TK_ID TK_COR_IZQ expr TK_COR_DER                          # ExprArrayAccessG4
     | TK_ID                                                     # ExprReferenciaVariableG4;
 
 args:
@@ -106,6 +121,7 @@ TK_SUMA: '+';
 TK_RESTA: '-';
 TK_MULT: '*';
 TK_DIV: '/';
+TK_MODULO: '%';
 TK_POTENCIA: '^';
 
 // Operadores Relacionales
@@ -129,6 +145,8 @@ TK_PAR_IZQ: '(';
 TK_PAR_DER: ')';
 TK_LLA_IZQ: '{';
 TK_LLA_DER: '}';
+TK_COR_IZQ: '[';
+TK_COR_DER: ']';
 
 // Palabras Reservadas
 TK_PROGRAMA: 'PROGRAMA';
@@ -141,6 +159,9 @@ TK_MIENTRAS: 'MIENTRAS';
 TK_FOR: 'FOR';
 TK_IMPRIMIR: 'IMPRIMIR';
 TK_RETURN: 'RETORNAR';
+TK_IMPORT: 'IMPORT';
+TK_BREAK: 'BREAK';
+TK_CONTINUE: 'CONTINUE';
 
 // Tipos de Datos
 TK_INT: 'INT';
