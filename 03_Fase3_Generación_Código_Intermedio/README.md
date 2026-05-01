@@ -1,1 +1,0 @@
-# Fase 3: Generación de Código Intermedio y LLVM IR\n\nEn esta carpeta se encuentran los entregables correspondientes a la Fase 3 del proyecto de Compiladores.\n\n### Entregables:\n1. Gramática v3 (Arreglos, Cadenas y Módulos)\n2. Generador de Código de Tres Direcciones (TAC)\n3. Generador de LLVM IR\n4. Interfaz de Usuario
