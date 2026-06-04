@@ -1,0 +1,15 @@
+program Prueba2 INICIO
+    // Prueba cortita para ver si sirve el switch y el ternario
+    int dia = 3;
+    
+    switch(dia) {
+        case 1: print("Lunes"); break;
+        case 2: print("Martes"); break;
+        case 3: print("Miercoles"); break;
+        default: print("Otro dia");
+    }
+    
+    // Operador ternario para no usar tantos ifs
+    bool finDeSemana = dia > 5 ? true : false;
+    print(finDeSemana);
+FIN
