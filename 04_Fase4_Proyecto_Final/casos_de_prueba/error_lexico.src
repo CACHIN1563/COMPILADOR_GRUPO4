@@ -1,0 +1,6 @@
+program ErrorLexico INICIO
+    // Rompiendo el analizador léxico a propósito
+    // Le metemos una arroba '@' que no existe en el lenguaje para que tire error
+    int a = 10 @ 5;
+    print(a);
+FIN

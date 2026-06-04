@@ -1,0 +1,8 @@
+program ErrorSintactico INICIO
+    // Aquí rompemos la sintaxis a ver si el parser se da cuenta
+    // Cerramos mal el if y clavamos un punto y coma donde no va
+    int a = 10;
+    if (a > 5 ; {
+        print("Mayor");
+    }
+FIN

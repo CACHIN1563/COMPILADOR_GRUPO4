@@ -1,0 +1,17 @@
+program Prueba1 INICIO
+    // Archivo para probar que los structs y el casteo funcionen bien solos
+    struct Persona {
+        int edad;
+        int alturaCm;
+    }
+    
+    Persona juan;
+    juan.edad = 25;
+    juan.alturaCm = 175;
+    
+    // Casteando a float para sacar la altura en metros
+    float alturaMetros = (float) juan.alturaCm / 100.0;
+    
+    print(juan.edad);
+    print(alturaMetros);
+FIN

@@ -1,0 +1,39 @@
+program Ejemplo INICIO
+ // Usando structs para hacer un punto y luego sacando la distancia (con cast a float para que no llore)
+ struct Punto { int x; int y; }
+ Punto p;
+ p.x = 3;
+ p.y = 4;
+ float dist = (float)(p.x * p.x + p.y * p.y);
+
+ // Probando el operador ternario (si es mayor a 20, está lejos)
+ string etiqueta = dist > 20.0 ? "lejos" : "cerca";
+ print(etiqueta);
+
+ // Switch case nuevecito con su default por si acaso
+ int opcion = 2;
+ switch(opcion) {
+     case 1: print("opcion uno"); break;
+     case 2: print("opcion dos"); break;
+     default: print("otra opcion");
+ }
+
+ // Seguimos jalando funciones recursivas del proyecto pasado (para probar la memoria)
+ int fibonacci(int n) {
+     if (n <= 1) { return n; }
+     return fibonacci(n - 1) + fibonacci(n - 2);
+ }
+
+ // Arrays del proyecto 3 (sumamos los pares nomás)
+ int[] nums = [5, 8, 13, 21, 34];
+ int i = 0;
+ int total = 0;
+ while (i < 5) {
+     int r = nums[i] % 2;
+     if (r == 0) { total = total + nums[i]; }
+     i = i + 1;
+     if (total > 50) { break; }
+ }
+ print(fibonacci(10));
+ print(total);
+FIN

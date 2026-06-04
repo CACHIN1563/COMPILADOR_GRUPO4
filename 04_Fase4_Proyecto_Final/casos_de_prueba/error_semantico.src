@@ -1,0 +1,7 @@
+program ErrorSemantico INICIO
+    // Aquí vemos si la semántica hace su trabajo
+    // Tratamos de meter un string en un int y llamamos a una función fantasma
+    int numero = "esto es un texto";
+    
+    funcionInexistente(numero);
+FIN
